@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>DuoForge · 2-agent code lab</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>DuoForge</h1>
+      <p>Two collaborating agents that plan, code, review, and ship your idea.</p>
+    </header>
+    <main>
+      <section class="left">
+        <label for="spec">Build specification</label>
+        <textarea id="spec" placeholder="Describe what you want DuoForge to build..."></textarea>
+        <button id="start">Start Build</button>
+        <a id="download" class="hidden" href="#" download>Download zip</a>
+        <div id="status" class="status"></div>
+      </section>
+      <section class="right">
+        <h2>Event log</h2>
+        <div id="log" class="log"></div>
+      </section>
+    </main>
+    <script src="/main.js"></script>
+  </body>
+</html>
