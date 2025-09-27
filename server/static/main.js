@@ -5,14 +5,18 @@ const downloadLink = document.getElementById("download");
 const statusBox = document.getElementById("status");
 
 function appendLog(agent, message, type) {
-  const entry = document.createElement("div");
-  entry.className = "log-entry";
-  const label = document.createElement("strong");
-  label.textContent = `${type.toUpperCase()} · ${agent || "system"}`;
-  entry.appendChild(label);
-  const body = document.createElement("div");
+  const entry = document.createElement("article");
+  entry.className = `message ${type || "info"}`;
+
+  const meta = document.createElement("div");
+  meta.className = "meta";
+  meta.textContent = `${(type || "event").toUpperCase()} · ${agent || "System"}`;
+  entry.appendChild(meta);
+
+  const body = document.createElement("pre");
   body.textContent = message;
   entry.appendChild(body);
+
   logContainer.appendChild(entry);
   logContainer.scrollTop = logContainer.scrollHeight;
 }
@@ -70,7 +74,7 @@ async function openSocket(sessionId, spec) {
   const socket = new WebSocket(`${protocol}://${window.location.host}/ws/${sessionId}`);
 
   socket.addEventListener("open", () => {
-    setStatus("Agents are working on your request...");
+    setStatus("Agents are collaborating on your request...");
     socket.send(JSON.stringify({ prompt: spec }));
   });
 
@@ -87,7 +91,7 @@ async function openSocket(sessionId, spec) {
   });
 
   socket.addEventListener("close", () => {
-    setStatus("Session finished. You can start another build.");
+    setStatus("Session finished. You can launch another build.");
     startButton.disabled = false;
   });
 
@@ -100,11 +104,7 @@ async function openSocket(sessionId, spec) {
 function handleEvent(event) {
   switch (event.type) {
     case "plan":
-      appendLog(event.from_agent, event.content, event.type);
-      break;
     case "diff":
-      appendLog(event.from_agent, event.content, event.type);
-      break;
     case "review":
       appendLog(event.from_agent, event.content, event.type);
       break;
@@ -112,13 +112,14 @@ function handleEvent(event) {
       downloadLink.href = event.url;
       downloadLink.classList.remove("hidden");
       setStatus("Build complete! Download is ready.");
+      appendLog("System", "Workspace archive prepared.", "info");
       break;
     case "error":
       appendLog("System", event.content || "An error occurred.", event.type);
       setStatus(event.content || "An error occurred.", "error");
       break;
     default:
-      appendLog("System", JSON.stringify(event), "info");
+      appendLog("System", JSON.stringify(event, null, 2), event.type || "info");
   }
 }
 
