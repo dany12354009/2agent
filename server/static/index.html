@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>DuoForge · 2-agent code lab</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="logo">⚡</span>
+          <div>
+            <h1>DuoForge</h1>
+            <p class="tagline">Two agents, one shipping lane.</p>
+          </div>
+        </div>
+        <div class="control">
+          <label for="spec">Build brief</label>
+          <textarea
+            id="spec"
+            placeholder="Describe what you want DuoForge to build..."
+          ></textarea>
+        </div>
+        <div class="actions">
+          <button id="start">Launch build</button>
+          <a id="download" class="download hidden" href="#" download>
+            Download build
+          </a>
+        </div>
+        <div id="status" class="status" role="status"></div>
+        <footer>
+          <p>
+            Need inspiration? Try describing a product idea—architect, coder, and
+            reviewer will take it from there.
+          </p>
+        </footer>
+      </aside>
+      <main class="workspace">
+        <header class="workspace-header">
+          <h2>Agent event stream</h2>
+          <p>
+            Watch the architect plan, the coder implement milestones, and the
+            reviewer keep quality high in real time.
+          </p>
+        </header>
+        <section id="log" class="chat-log" aria-live="polite"></section>
+      </main>
+    </div>
+    <script src="/main.js"></script>
+  </body>
+</html>
