@@ -1,7 +1,8 @@
 # 2agent
 
 A minimal two-agent conversation platform. Agents are simple callables that receive a prompt and the full conversation history,
-making it easy to script deterministic interactions or prototypes without external dependencies.
+making it easy to script deterministic interactions or prototypes without external dependencies. A lightweight text UI (CLI)
+is included so you can experiment with the platform without writing code.
 
 ## Features
 - Register lightweight agents implemented as Python callables.
@@ -56,6 +57,35 @@ conversation.add_agent(gamma)
 all_replies = conversation.broadcast("alpha", "status check")
 for reply in all_replies:
     print(reply)
+```
+
+### CLI text UI
+
+Run the platform without writing code using the built-in CLI. It ships with a handful of ready-to-use agents: `echo`, `uppercase`,
+`reverse`, and `counter`.
+
+Launch the interactive REPL:
+
+```bash
+python -m agent_platform repl
+```
+
+Send a single message between default agents and view the rendered history:
+
+```bash
+python -m agent_platform send echo uppercase "hello world"
+```
+
+Broadcast a status update from the `counter` agent to all others:
+
+```bash
+python -m agent_platform broadcast counter "status check"
+```
+
+Run an alternating dialogue for a few turns:
+
+```bash
+python -m agent_platform dialogue echo reverse "keep going" --turns 4
 ```
 
 ## Running tests
