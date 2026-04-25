@@ -43,15 +43,19 @@ AutoCut AI is a local-first AI editing assistant for short-form video (TikTok, S
 
 PySide6 desktop app includes:
 - Import Screen
-- Analysis Progress Screen
+- Analysis Progress Screen (background worker thread)
 - Editor Dashboard with:
-  - preview panel
-  - timeline viewer
-  - detected subjects/actions panel
-  - style selector
-  - intensity slider
-  - overlay toggles (tracking + attention)
-  - export button
+  - preview/overlay panel
+  - timeline action table
+  - style selector + intensity slider
+  - manual override panel placeholders
+  - analysis summary panel
+  - export and companion guide buttons
+
+Terminal UI (`curses`) includes:
+- keyboard-driven workflow for path/style/intensity
+- run analysis + export without GUI
+- action/warning preview in terminal
 
 ## CapCut Integration Modes
 
@@ -105,20 +109,28 @@ pip install -e '.[dev]'
 
 ## CLI
 
+Batch processing:
+
 ```bash
-python -m autocut_ai.cli input.mp4 --style clean_shorts --out out --license free --intensity 0.7
+python -m autocut_ai.cli batch input.mp4 --style clean_shorts --out out --license free --intensity 0.7
 ```
 
-Batch:
+Multi-clip batch:
 
 ```bash
-python -m autocut_ai.cli a.mp4 b.mp4 --style gaming_short --out out_batch
+python -m autocut_ai.cli batch a.mp4 b.mp4 --style gaming_short --out out_batch
 ```
 
-## Desktop App
+Launch terminal UI:
 
 ```bash
-python -c "from autocut_ai.ui.app import launch; launch()"
+python -m autocut_ai.cli tui
+```
+
+Launch desktop UI:
+
+```bash
+python -m autocut_ai.cli desktop
 ```
 
 ## Reliability & Recovery
