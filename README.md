@@ -1,90 +1,128 @@
-# AutoCut AI (Local Prototype)
+# AutoCut AI — Production-Oriented Local Desktop Editor
 
-AutoCut AI is a desktop-first local video editing assistant that analyzes raw clips and generates a CapCut-ready edit plan.
+AutoCut AI is a local-first AI editing assistant for short-form video (TikTok, Shorts, Reels). This codebase is structured as a production-ready desktop product with modular analysis, decision logic, timeline generation, and CapCut integration modes.
 
-## What this prototype does
+## Product Architecture
 
-- Imports a video clip.
-- Runs local-first analysis modules for:
-  - Scene change detection (OpenCV histogram-diff).
-  - Motion intensity analysis (OpenCV frame differencing).
-  - Beat detection (Librosa, optional).
-  - Subject detection/tracking (YOLO optional, with lightweight fallback).
-- Detects a **main subject** and builds edit actions:
-  - zoom emphasis on motion
-  - beat cuts
-  - scene flash transitions
-- Supports editing styles:
-  - gaming short
-  - cinematic
-  - meme
-  - fast tiktok
-  - dramatic slowmo
-  - clean shorts
-- Exports for CapCut workflows:
-  - `timeline.json` (edit decision list)
-  - `keyframes.csv` (crop/zoom-compatible keyframes)
-  - `effects.json` (recommended effect timestamps)
+### 1) Video Processing Engine
+- Multi-resolution frame extraction with threaded resizing.
+- Video metadata handling and cache metadata persistence.
+- Sampling controls for light/full analysis modes.
 
-## Architecture
+### 2) AI Analysis Engine
+- Independent modules feeding a central graph:
+  - Detection (`YOLO` when available, fallback otherwise)
+  - Tracking (hook point for SORT/DeepSORT)
+  - Face/body confidence boosting (`MediaPipe` optional)
+  - Scene cuts
+  - Motion spikes
+  - Audio beats (`librosa` optional)
+  - Speech (`whisper` optional)
 
-```text
-Video -> Load/Frame Sample
-      -> Analyze (scene/motion/audio/subject)
-      -> Main Subject Selection
-      -> Style-aware Edit Planner
-      -> CapCut Exporters (JSON/CSV)
-      -> Optional UI Automation module
-```
+### 3) Scene Intelligence Graph (Core)
+- Central temporal graph storing:
+  - subjects and track states
+  - events (beats, action spikes, transitions, speech)
+  - low-confidence warnings
+- All edit decisions are derived from this graph.
 
-Key modules:
-- `autocut_ai/engine.py`: orchestration.
-- `autocut_ai/analyzers/*`: pluggable local AI / CV analyzers.
-- `autocut_ai/planner.py`: style-aware plan generation.
-- `autocut_ai/exporters/*`: CapCut bridge outputs.
-- `autocut_ai/ui/app.py`: PySide6 dark desktop UI.
-- `autocut_ai/integrations/capcut_automation.py`: optional automation layer.
+### 4) Edit Decision Engine
+- Layered editing intelligence:
+  - **Attention model** (event confidence + center bias + style intensity)
+  - **Rhythm engine** (beat-aligned cuts)
+  - **Cinematic rules** (shake anti-spam, continuity transitions)
+  - **Style profiles** (`gaming_short`, `cinematic`, `viral_shorts`, `clean_shorts`)
+
+### 5) Timeline Generator
+- Generates timeline tracks/layers:
+  - video base track
+  - effects track
+  - captions track
+
+## Desktop UX
+
+PySide6 desktop app includes:
+- Import Screen
+- Analysis Progress Screen
+- Editor Dashboard with:
+  - preview panel
+  - timeline viewer
+  - detected subjects/actions panel
+  - style selector
+  - intensity slider
+  - overlay toggles (tracking + attention)
+  - export button
+
+## CapCut Integration Modes
+
+1. **Export Mode (primary)**
+   - `timeline.json`
+   - `keyframes.csv`
+   - `effects.json`
+   - `captions.srt` (if transcript captions are generated)
+
+2. **Companion Mode**
+   - Step-by-step import instructions via `CapCutCompanion`.
+
+3. **Automation Mode (optional)**
+   - User confirmation gate.
+   - Dry-run mode by default.
+
+## Extensibility
+
+- Plugin registry for:
+  - analysis modules
+  - style plugins
+  - export handlers
+- Clear module boundaries under `analysis/`, `decision/`, `timeline/`, `video/`, `integrations/`.
+
+## Monetization-Ready Features
+
+- License policy layer:
+  - **Free** tier: style limits + watermark-ready behavior
+  - **Pro** tier: full style access and full-resolution policy hooks
+- Local-only operation; no cloud dependency required.
 
 ## Install
 
-Minimal (for structure/tests):
+Minimal (lightweight):
 
 ```bash
 pip install -e .
 ```
 
-Full local AI stack (optional):
+Optional full local model stack:
 
 ```bash
 pip install -e '.[full]'
 ```
 
-Dev tools:
+Dev dependencies:
 
 ```bash
 pip install -e '.[dev]'
 ```
 
-## CLI usage
+## CLI
 
 ```bash
-python -m autocut_ai.cli /path/to/video.mp4 --style gaming_short --out out_dir
+python -m autocut_ai.cli input.mp4 --style clean_shorts --out out --license free --intensity 0.7
 ```
 
-## Desktop UI
+Batch:
+
+```bash
+python -m autocut_ai.cli a.mp4 b.mp4 --style gaming_short --out out_batch
+```
+
+## Desktop App
 
 ```bash
 python -c "from autocut_ai.ui.app import launch; launch()"
 ```
 
-## Extending models
+## Reliability & Recovery
 
-This repo intentionally keeps analyzers modular:
-- Swap YOLO models in `SubjectAnalyzer._run_yolo`.
-- Add MediaPipe face/body weighting in `SubjectAnalyzer`.
-- Add Whisper subtitle extraction module and pass captions to `export_srt`.
-- Add new styles by extending `EditStyle` + `STYLE_EFFECT_PRESETS`.
-
-## Safety note on CapCut automation
-
-UI automation is disabled by default and should be user-confirmed due to desktop-control risk. Use exported artifacts for manual import as the default workflow.
+- Low-confidence warnings when detection/tracking is weak.
+- Fallback center-subject framing when models are unavailable.
+- Decision traces are included in timeline actions (`reason` field) for debugging.

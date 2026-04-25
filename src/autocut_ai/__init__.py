@@ -1,5 +1,5 @@
-"""AutoCut AI package."""
+"""AutoCut AI production-ready local desktop toolkit."""
 
-from .engine import AutoCutEngine
+from .app.application import create_service
 
-__all__ = ["AutoCutEngine"]
+__all__ = ["create_service"]

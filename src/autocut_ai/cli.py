@@ -3,32 +3,31 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from .engine import AutoCutEngine
-from .exporters.capcut_exports import (
-    export_effect_recommendations,
-    export_keyframes_csv,
-    export_timeline_json,
-)
-from .models import EditStyle
+from .app.application import create_service
+from .decision.styles import STYLE_PROFILES
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="AutoCut AI local editing planner")
-    parser.add_argument("video", help="Path to input video")
-    parser.add_argument("--style", default=EditStyle.CLEAN_SHORTS.value, choices=[s.value for s in EditStyle])
+    parser = argparse.ArgumentParser(description="AutoCut AI production CLI")
+    parser.add_argument("video", nargs="+", help="Input video path(s)")
+    parser.add_argument("--style", default="clean_shorts", choices=sorted(STYLE_PROFILES.keys()))
     parser.add_argument("--out", default="autocut_output", help="Output folder")
+    parser.add_argument("--license", default="free", choices=["free", "pro"])
+    parser.add_argument("--intensity", type=float, default=0.7)
     args = parser.parse_args()
 
-    engine = AutoCutEngine()
-    plan = engine.auto_edit(args.video, EditStyle(args.style))
+    service = create_service(license_tier=args.license)
+    service.config.product.edit_intensity = max(0.1, min(args.intensity, 1.0))
 
-    out_dir = Path(args.out)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    t = export_timeline_json(plan, out_dir / "timeline.json")
-    k = export_keyframes_csv(plan, out_dir / "keyframes.csv")
-    e = export_effect_recommendations(plan, out_dir / "effects.json")
+    results = service.batch_process(args.video, args.style)
+    root = Path(args.out)
+    root.mkdir(parents=True, exist_ok=True)
 
-    print(f"Exported:\n- {t}\n- {k}\n- {e}")
+    for src, result in zip(args.video, results):
+        target = root / Path(src).stem
+        paths = service.export_all(result, target)
+        print(f"[{src}] warnings: {result.warnings}")
+        print(paths)
 
 
 if __name__ == "__main__":

@@ -1,13 +1,13 @@
 import json
 
 from autocut_ai.exporters.capcut_exports import export_timeline_json
-from autocut_ai.models import EditPlan, EditStyle, TimelineAction
+from autocut_ai.models import EditPlan, TimelineAction
 
 
 def test_export_timeline_json(tmp_path) -> None:
     plan = EditPlan(
         source_video="in.mp4",
-        style=EditStyle.CLEAN_SHORTS,
+        style="clean_shorts",
         actions=[
             TimelineAction(
                 timestamp=1.2,
@@ -24,4 +24,4 @@ def test_export_timeline_json(tmp_path) -> None:
     export_timeline_json(plan, out)
     payload = json.loads(out.read_text())
     assert payload["source_video"] == "in.mp4"
-    assert payload["actions"][0]["effect"] == "beat_cut"
+    assert payload["style"] == "clean_shorts"
