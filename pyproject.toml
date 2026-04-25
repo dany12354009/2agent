@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autocut-ai"
+version = "0.1.0"
+description = "Local AI-assisted video editing planner for CapCut"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+full = [
+  "numpy>=1.26",
+  "opencv-python>=4.9",
+  "librosa>=0.10",
+  "pyside6>=6.7",
+  "openai-whisper>=20231117",
+  "ultralytics>=8.2",
+  "mediapipe>=0.10",
+]
+dev = ["pytest>=8.0", "ruff>=0.5"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
